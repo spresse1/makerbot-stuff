@@ -5,6 +5,7 @@ from urllib2 import urlopen
 from sys import argv
 from urllib import urlretrieve
 from os.path import basename
+import subprocess
 
 def usage():
 	print """
@@ -71,5 +72,17 @@ for package in packages.keys():
 #Now fetch the files
 for package in packages.keys():
 	for version in packages[package]:
-		filename = package + version + argv[2] + '.deb'
+		filename = package + '_' + version + '_' + argv[2] + '.deb'
+		print "Fetching: " + basename(filename)
 		urlretrieve('http://downloads.makerbot.com.s3.amazonaws.com/' + filename, basename(filename))
+
+#And do an install.
+packagesToInstall = ["sudo", "dpkg","--install"]
+for package in packages.keys():
+        for version in packages[package]:
+                filename = package + '_' + version + '_' + argv[2] + '.deb'
+		packagesToInstall.append(basename(filename))
+
+print packagesToInstall
+subprocess.call(packagesToInstall)
+subprocess.call(["sudo","apt-get","install","-f","-y"])
